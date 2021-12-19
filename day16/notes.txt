@@ -1,0 +1,76 @@
+hexadecimal representation of bits
+
+decode into binary in full
+
+Header:
+6 bits long
+
+3 bit most significant bit first
+
+3 bits version
+3 bits type ID
+
+Packet:
+    type ID of 4 (100):
+        literal packet type
+
+        prepend 0's to the packet until multiple of 4
+
+        break up into groups of 4 bits
+
+        prepend every group with 1 except last group prepend 0
+
+        So the end of the packet can be traced to a 5 bit group
+        beginning with 0
+    
+    all other type ID's:
+        operator packet type
+
+        following the header, 1 bit: length type ID
+
+        0:
+        next 15 bits number representing the total length of bits of the sub-packets
+
+        1:
+        next 11 bits number representing number of sub-packets in the packet
+
+
+int(binary, 2) binary => decimal
+format(decimal, "b") decimal => binary
+
+part1
+
+ 4  Op     (11 bits)  1   Op    (11 bits)   5   Op       (15 bits)     6  Lit       trailing 0's
+100 010 1 00000000001 001 010 1 00000000001 101 010 0 000000000001011 110 100 01111 000
+
+ 3   Op   (11 bits)    0  Op      (15 bits)      0  Lit        5  Lit        1   Op    (11 bits)   0   Lit      6   Lit      trailing 0's
+011 000 1 00000000010 000 000 0 000000000010110 000 100 01010 101 100 01011 001 000 1 00000000010 000 100 01100 011 100 01101 00
+
+
+part2
+
+
+    sum    (11 bits)  Lit  1       Lit  2
+110 000 1 00000000010 110 100 00001 010 100 00010
+
+   prod     (15 bits)         Lit   6       Lit  9
+000 001 0 000000000010110 101 100 00110 011 100 01001 0000
+
+    Min   33 reserved bits    Lit           Lit           Lit       trailing 0
+100 010 0 000000000100001 101 100 00111 110 100 01000 000 100 01001 0
+
+    Equal     20 bits         Lit   5       Lit       15
+100 111 0 000000000010110 101 100 00101 111 100 01111 0000
+
+   equal                      sum                   Lit   1       Lit  3        prod                 Lit   2       Lit  2
+100 111 0 000000001010000 010 000 1 00000000010 010 100 00001 100 100 00011 110 001 1 00000000010 000 100 00010 010 100 00010 00
+
+
+type_id:
+
+    0, 1, 2, 3 all can have 1 or more sub_packets
+
+    5, 6, 7 all have exactly 2 sub_packets
+
+I think recursive calls probably works here,
+return the eventual Literal value to callee => callee e.t.c

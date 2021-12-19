@@ -1,0 +1,55 @@
+From https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm:
+
+"This algorithm makes no attempt of direct 'exploration' towards the destination
+as one might expect. Rather, the sole consideration in determining the next 'current'
+intersection is its distance from the starting point. This algorithm therefore
+expands outward from the starting point, interactively considering every node
+that is closer in terms of shortest path distance until it reaches the destination.
+When understood in this way, it is clear how the algorithm necessarily finds the
+shortest path. However, it may also reveal one of the algorithm's weaknesses:
+its relative slowness in some topologies."
+
+From https://en.wikipedia.org/wiki/A*_search_algorithm:
+
+"Dijkstra's algorithm, as another example of a uniform-cost search algorithm,
+can be viewed as a special case of A* where h(x) = 0 for all x"
+
+Dijkstra's Algorithm will find the lowest distance path from start node to all nodes.
+But we can manually break once the end is found to speed this up
+
+A* is guided by a heuristic function. It will only explore nodes along a path
+that it determines to be "closer" to the end node (in other words lowest f-score).
+Whereas at each step, Dijkstra's evaluates the node that has the next shortest path from
+the start node (from counting edges)
+
+I can't see a heuristic to guide here, being closer to the end does not
+imply lower risks.
+
+https://docs.python.org/3/library/heapq.html
+
+heapqueue, stores all possible node paths that is always sorted by node with lowest risk
+
+we use heappop to get node with the lowest tentative risk
+
+min_risk dictionary, the value is the tentative
+least risk to get from the start node to the node key,
+initially 0 for start node and infinity for all other nodes
+
+visited set
+
+pseudocode:
+
+heappop(queue)
+
+if end node return
+
+add node to visited
+
+evaluate all of nodes neighbours if not in visited set,
+
+neighbour edge + cost of path to this node = cost of path to this neighbour
+
+if less than value in min_risk dict
+
+update dict
+add to heapqueue
