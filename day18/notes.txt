@@ -1,0 +1,22 @@
+addition(a, b):
+    sum = [a,b]
+    reduce(sum)
+
+reduce(): 
+    Priority list, restart list on match
+        1. first pair nested in four pairs explodes
+        2. first num >= 10 splits
+
+    explode(pair):
+        a <- [3,2] -> b
+        a and b stay in place
+        pair explodes and becomes 0
+        a, pair and b become: a + 3, 0, b + 2
+        if number a or b don't exist, no action on that side
+
+    split(num):
+        from math import floor, ceil
+
+        num becomes [math.floor(num/2),math.ceil(num/2)]
+        
+        10 => [5,5]
