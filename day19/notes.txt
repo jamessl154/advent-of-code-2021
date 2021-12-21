@@ -1,0 +1,78 @@
+PART 1
+
+Unknown rotation and facing direction
+x, y, z
+
+https://www.geogebra.org/3d?lang=en
+
+
+
+
+For each beacon coord in scanner x:
+    for each 24 orientations of each beacon coord in scanner y:
+        Assume the coords point at the same beacon,
+        orientate all other beacon coords in y from scanner x
+        iterate through x and orientated y, count and store overlapping points
+        after current iteration check
+        if > 12 common beacons:
+            stop here because that's what the challenge
+            indicates is a match for reconstruction
+
+Do this between x and all scanners
+
+Meanwhile for each scanner a that has > 12 common beacons with x
+storing those beacon coords/adding to a full set (reconstruction)
+
+absolute orientation cannot be found with this info, we are just fixing
+scanner 0's orientation, finding beacons/scanners (according to condition)
+then reconstructing a 3d map relative to that orientation
+
+
+
+Rotations of cube while considering each side as the base
+6 sides * 4 orientations each = 24 total orientations
+
+Start at x, y, z (i.e. assume the current orientation of the scanner
+being evaluated is identical to that of scanner 0)
+
+bottom
+
+ x,  y,  z
+ x,  y, -z
+-x,  y, -z
+-x,  y,  z
+
+top
+
+-x, -y, -z
+-x, -y,  z
+ x, -y,  z
+ x, -y, -z
+
+right
+
+ y, -x, -z
+ y,  x, -z
+ y, -x,  z
+ y,  x,  z
+
+left
+
+-y, -x, -z
+-y,  x, -z
+-y,  x,  z
+-y, -x,  z
+
+back
+
+ x, -z, -y
+-x, -z, -y
+-x,  z, -y
+ x,  z, -y
+
+front
+
+-x, -z,  y
+-x,  z,  y
+ x,  z,  y
+ x, -z,  y

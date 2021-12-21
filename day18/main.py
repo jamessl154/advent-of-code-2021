@@ -204,15 +204,14 @@ def magnitude(snailfish_number):
 
     open_bracket = 0
 
-    comma_separator = 0
-
-    # find the comma
+    # find the comma in the outermost bracket scope
     for i in range(len(snailfish_number)):
         if snailfish_number[i] == "[":
             open_bracket += 1
         if snailfish_number[i] == "]":
             open_bracket -= 1
         if open_bracket == 1 and snailfish_number[i] == ",":
+            # Recursively call magnitude on the left and right arguments in the pair
             result = magnitude(snailfish_number[1:i]) * 3 + magnitude(snailfish_number[i + 1:len(snailfish_number) - 1]) * 2
             return result
 
