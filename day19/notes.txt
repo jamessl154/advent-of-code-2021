@@ -76,3 +76,22 @@ front
 -x,  z,  y
  x,  z,  y
  x, -z,  y
+
+iterate through scanner_0, how many matches do we have in the current orientation
+if scanner[0] and scanner_0[0] point to the same point
+
+then 2nd orientation, scanner[0] + scanner_0[0] point to same point?
+then 3nd orientation, scanner[0] + scanner_0[0] point to same point?
+...
+
+finally 24th orientation,
+
+now scanner[1] and scanner_0[0]
+
+...
+
+finally scanner[len(scanner) - 1] and scanner_0[0]
+
+...
+
+repeat all with scanner_0[1] ... e.t.c
