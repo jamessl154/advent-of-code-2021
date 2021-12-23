@@ -6,8 +6,6 @@ x, y, z
 https://www.geogebra.org/3d?lang=en
 
 
-
-
 For each beacon coord in scanner x:
     for each 24 orientations of each beacon coord in scanner y:
         Assume the coords point at the same beacon,
@@ -26,7 +24,6 @@ storing those beacon coords/adding to a full set (reconstruction)
 absolute orientation cannot be found with this info, we are just fixing
 scanner 0's orientation, finding beacons/scanners (according to condition)
 then reconstructing a 3d map relative to that orientation
-
 
 
 Rotations of cube while considering each side as the base
@@ -95,3 +92,18 @@ finally scanner[len(scanner) - 1] and scanner_0[0]
 ...
 
 repeat all with scanner_0[1] ... e.t.c
+
+-----------------
+
+Big error interpreting the challenge => to add a scanner to the map we must find
+12 overlapping beacons between this scanner and any scanner that already exists in
+the map.
+
+E.g. Proven scanner[0] and scanner[1] share 12 common points
+
+scanner[0] and scanner[1] exist in the map
+
+condition for scanners[2] joining the map is sharing 12 common points with either
+scanner[0] or scanner[1] ... e.t.c.
+
+Need to rerun the process until all beacons are mapped

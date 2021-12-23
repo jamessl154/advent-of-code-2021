@@ -14,9 +14,7 @@ puzzle_input = list(map(lambda x: list(map(lambda y: y.split(","), x)), puzzle_i
 puzzle_input = list(map(lambda x: list(map(lambda y: list(map(lambda z: int(z), y)), x)), puzzle_input))
 # print(puzzle_input)
 
-scanner_0 = puzzle_input[0]
-
-scanners = puzzle_input[1:]
+scanners = puzzle_input
 
 # https://docs.python.org/3/library/copy.html#copy.deepcopy
 
@@ -215,8 +213,22 @@ def orientations_24(scanner):
     return scanner_list
 
 # Tests for orientations_24 => use open("scanner.txt", "r")
-# for i in orientations_24(scanner_0):
+# for i in orientations_24(scanners[0]):
 #     print(i[0])
+
+def check_match_in_scanner_map(scanner):
+
+    for i in range(len(scanner_map)):
+
+        # reset counter after each scanner
+        counter = 0
+
+        for j in scanner:
+            if j in scanner_map[i]:
+                counter += 1
+
+        if counter >= 12:
+            return scanner
 
 def find12commonbeacons(scanner, base_coord):
 
@@ -233,44 +245,74 @@ def find12commonbeacons(scanner, base_coord):
             j[1] += y_offset
             j[2] += z_offset
 
-        counter = 0
-
-        for j in scanner_0:
-            for k in temp:
-                if j == k:
-                    counter += 1
-
-        # Found at least 12 common beacons for this scanner
-        if counter >= 12:
-            return temp
+        result = check_match_in_scanner_map(temp)
+        if result:
+            return result
 
 def solve_scanner(scanner, base_coord):
 
-    for i in orientations_24(scanner):
+    for orientation in orientations_24(scanner):
 
-        result = find12commonbeacons(i, base_coord)
+        result = find12commonbeacons(orientation, base_coord)
 
         if result:
             return result
 
-full_beacon_list = []
+def add_scanner_to_map(scanner, full_beacon_set):
 
-for i in scanner_0:
-    for j in scanners:
-        result = solve_scanner(j, i)
+    # for all beacons in a scanners 24 orientations,
+    # if that beacon points to a beacon in the set, does
+    # that scanner share 12 common beacons?
+
+    for base_coord in full_beacon_set:
+
+        result = solve_scanner(scanner, base_coord)
 
         if result:
-            for k in result:
-                full_beacon_list.append(k)
+            return result
 
-# TypeError: unhashable type: 'list' when converting to set
+scanner_map = [scanners[0]]
 
-full_beacon_set = set()
+# keeps track of which scanners are not in the map by their index in scanners
+scanners_missing = []
 
-for i in full_beacon_list:
-    x, y, z = i[0], i[1], i[2]
-    temp = (x, y, z)
-    full_beacon_set.add(temp)
+for i in range(1, len(scanners)):
+    scanners_missing.append(i)
 
-print("\nfull_beacon_set\n", full_beacon_set)
-print("part1", len(full_beacon_set))
+def main():
+
+    # keeps tracks of all unique points in 3d region relative to scanners[0] at 0,0,0
+    full_beacon_set = set()
+
+    # initially the region only contains scanners[0]'s beacons
+    for i in scanners[0]:
+        x, y, z = i
+        full_beacon_set.add((x, y, z))
+
+    while scanners_missing:
+
+        # Try to add each scanner to the scanner_map 1 at a time
+        for i in scanners_missing:
+
+            result = add_scanner_to_map(scanners[i], full_beacon_set)
+
+            if result:
+
+                # Add to the scanner map
+                scanner_map.append(result)
+
+                # remove from missing scanners
+                scanners_missing.remove(i)
+
+                for j in result:
+                    x, y, z = j
+                    # add each beacon of scanner to set
+                    full_beacon_set.add((x, y, z))
+
+    full_beacon_set = sorted(full_beacon_set, key=lambda x: x[0])
+
+    print(len(scanner_map))
+    print("full_beacon_set\n", full_beacon_set)
+    print("part1", len(full_beacon_set))
+
+main()
