@@ -18,6 +18,8 @@ scanners = puzzle_input
 
 # https://docs.python.org/3/library/copy.html#copy.deepcopy
 
+# My rotations were wrong: https://github.com/Dullstar/Advent_Of_Code/blob/main/python/year2021/day19_rotations.txt
+
 def orientations_24(scanner):
     """transforms a scanner into a list of 24 scanners for each orientation"""
 
@@ -29,7 +31,7 @@ def orientations_24(scanner):
     temp = deepcopy(scanner)
 
     for i in range(len(temp)):
-        temp[i][2] *= -1
+        temp[i][0], temp[i][2] = -1 * temp[i][2], temp[i][0]
 
     scanner_list.append(temp)
 
@@ -44,7 +46,7 @@ def orientations_24(scanner):
     temp = deepcopy(scanner)
 
     for i in range(len(scanner)):
-        temp[i][0] *= -1
+        temp[i][0], temp[i][2] = temp[i][2], -1 * temp[i][0]
 
     scanner_list.append(temp)
 
@@ -55,21 +57,13 @@ def orientations_24(scanner):
     for i in range(len(temp)):
         temp[i][0] *= -1
         temp[i][1] *= -1
-        temp[i][2] *= -1
 
     scanner_list.append(temp)
 
     temp = deepcopy(scanner)
 
     for i in range(len(scanner)):
-        temp[i][0] *= -1
-        temp[i][1] *= -1
-
-    scanner_list.append(temp)
-
-    temp = deepcopy(scanner)
-
-    for i in range(len(scanner)):
+        temp[i][0], temp[i][2] = -1 * temp[i][2], -1 * temp[i][0]
         temp[i][1] *= -1
 
     scanner_list.append(temp)
@@ -79,6 +73,14 @@ def orientations_24(scanner):
     for i in range(len(scanner)):
         temp[i][1] *= -1
         temp[i][2] *= -1
+
+    scanner_list.append(temp)
+
+    temp = deepcopy(scanner)
+
+    for i in range(len(scanner)):
+        temp[i][0], temp[i][2] = temp[i][2], temp[i][0]
+        temp[i][1] *= -1
 
     scanner_list.append(temp)
 
@@ -87,16 +89,7 @@ def orientations_24(scanner):
     temp = deepcopy(scanner)
 
     for i in range(len(temp)):
-        temp[i][0], temp[i][1] = temp[i][1], -1 * temp[i][0]
-        temp[i][2] *= -1
-
-    scanner_list.append(temp)
-
-    temp = deepcopy(scanner)
-
-    for i in range(len(scanner)):
-        temp[i][0], temp[i][1] = temp[i][1], temp[i][0]
-        temp[i][2] *= -1
+        temp[i][0], temp[i][1], temp[i][2] = temp[i][1], temp[i][2], temp[i][0]
 
     scanner_list.append(temp)
 
@@ -110,7 +103,15 @@ def orientations_24(scanner):
     temp = deepcopy(scanner)
 
     for i in range(len(scanner)):
+        temp[i][0], temp[i][1], temp[i][2] = temp[i][1], -1 * temp[i][2], -1 * temp[i][0]
+
+    scanner_list.append(temp)
+
+    temp = deepcopy(scanner)
+
+    for i in range(len(scanner)):
         temp[i][0], temp[i][1] = temp[i][1], temp[i][0]
+        temp[i][2] *= -1
 
     scanner_list.append(temp)
 
@@ -119,6 +120,20 @@ def orientations_24(scanner):
     temp = deepcopy(scanner)
 
     for i in range(len(temp)):
+        temp[i][0], temp[i][1] = -1 * temp[i][1], temp[i][0]
+
+    scanner_list.append(temp)
+
+    temp = deepcopy(scanner)
+
+    for i in range(len(scanner)):
+        temp[i][0], temp[i][1], temp[i][2] = -1 * temp[i][1], -1 * temp[i][2], temp[i][0]
+
+    scanner_list.append(temp)
+
+    temp = deepcopy(scanner)
+
+    for i in range(len(scanner)):
         temp[i][0], temp[i][1] = -1 * temp[i][1], -1 * temp[i][0]
         temp[i][2] *= -1
 
@@ -127,22 +142,7 @@ def orientations_24(scanner):
     temp = deepcopy(scanner)
 
     for i in range(len(scanner)):
-        temp[i][0], temp[i][1] = -1 * temp[i][1], temp[i][0]
-        temp[i][2] *= -1
-
-    scanner_list.append(temp)
-
-    temp = deepcopy(scanner)
-
-    for i in range(len(scanner)):
-        temp[i][0], temp[i][1] = -1 * temp[i][1], temp[i][0]
-
-    scanner_list.append(temp)
-
-    temp = deepcopy(scanner)
-
-    for i in range(len(scanner)):
-        temp[i][0], temp[i][1] = -1 * temp[i][1], -1 * temp[i][0]
+        temp[i][0], temp[i][1], temp[i][2] = -1 * temp[i][1], temp[i][2], -1 * temp[i][0]
 
     scanner_list.append(temp)
 
@@ -151,7 +151,14 @@ def orientations_24(scanner):
     temp = deepcopy(scanner)
 
     for i in range(len(temp)):
-        temp[i][1], temp[i][2] = -1 * temp[i][2], -1 * temp[i][1]
+        temp[i][1], temp[i][2] = temp[i][2], -1 * temp[i][1]
+
+    scanner_list.append(temp)
+
+    temp = deepcopy(scanner)
+
+    for i in range(len(scanner)):
+        temp[i][0], temp[i][1], temp[i][2] = temp[i][2], -1 * temp[i][0], -1 * temp[i][1]
 
     scanner_list.append(temp)
 
@@ -166,15 +173,7 @@ def orientations_24(scanner):
     temp = deepcopy(scanner)
 
     for i in range(len(scanner)):
-        temp[i][1], temp[i][2] = temp[i][2], -1 * temp[i][1]
-        temp[i][0] *= -1
-
-    scanner_list.append(temp)
-
-    temp = deepcopy(scanner)
-
-    for i in range(len(scanner)):
-        temp[i][1], temp[i][2] = temp[i][2], -1 * temp[i][1]
+        temp[i][0], temp[i][1], temp[i][2] = -1 * temp[i][2], temp[i][0], -1 * temp[i][1]
 
     scanner_list.append(temp)
 
@@ -184,7 +183,13 @@ def orientations_24(scanner):
 
     for i in range(len(temp)):
         temp[i][1], temp[i][2] = -1 * temp[i][2], temp[i][1]
-        temp[i][0] *= -1
+
+    scanner_list.append(temp)
+
+    temp = deepcopy(scanner)
+
+    for i in range(len(scanner)):
+        temp[i][0], temp[i][1], temp[i][2] = -1 * temp[i][2], -1 * temp[i][0], temp[i][1]
 
     scanner_list.append(temp)
 
@@ -199,14 +204,7 @@ def orientations_24(scanner):
     temp = deepcopy(scanner)
 
     for i in range(len(scanner)):
-        temp[i][1], temp[i][2] = temp[i][2], temp[i][1]
-
-    scanner_list.append(temp)
-
-    temp = deepcopy(scanner)
-
-    for i in range(len(scanner)):
-        temp[i][1], temp[i][2] = -1 * temp[i][2], temp[i][1]
+        temp[i][0], temp[i][1], temp[i][2] = temp[i][2], temp[i][0], temp[i][1]
 
     scanner_list.append(temp)
 
