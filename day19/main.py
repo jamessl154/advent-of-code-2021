@@ -1,7 +1,7 @@
 import re
 from copy import deepcopy
 
-with open("test.txt", "r") as f:
+with open("input.txt", "r") as f:
     puzzle_input = f.read().split("\n\n")
 
 # print(puzzle_input)
@@ -224,6 +224,8 @@ def check_match_in_scanner_map(scanner):
         for j in scanner:
             if j in scanner_map[i]:
                 counter += 1
+                # if counter > 1:
+                    # print(counter)
 
         if counter >= 12:
             return scanner
@@ -244,6 +246,7 @@ def find12commonbeacons(scanner, base_coord):
             j[2] += z_offset
 
         result = check_match_in_scanner_map(temp)
+
         if result:
             return result
 
@@ -296,11 +299,17 @@ def main():
 
             if result:
 
+                # print(i)
+                # print("------")
                 # Add to the scanner map
                 scanner_map.append(result)
-
+                
+                # print("before")
+                # print(scanners_missing)
                 # remove from missing scanners
                 scanners_missing.remove(i)
+                # print("after")
+                # print(scanners_missing)
 
                 for j in result:
                     x, y, z = j

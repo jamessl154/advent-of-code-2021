@@ -5,26 +5,9 @@ x, y, z
 
 https://www.geogebra.org/3d?lang=en
 
-
-For each beacon coord in scanner x:
-    for each 24 orientations of each beacon coord in scanner y:
-        Assume the coords point at the same beacon,
-        orientate all other beacon coords in y from scanner x
-        iterate through x and orientated y, count and store overlapping points
-        after current iteration check
-        if > 12 common beacons:
-            stop here because that's what the challenge
-            indicates is a match for reconstruction
-
-Do this between x and all scanners
-
-Meanwhile for each scanner a that has > 12 common beacons with x
-storing those beacon coords/adding to a full set (reconstruction)
-
-absolute orientation cannot be found with this info, we are just fixing
-scanner 0's orientation, finding beacons/scanners (according to condition)
+Absolute orientation cannot be found with this info, we are just fixing
+scanner 0's orientation, finding matches of scanners (12 overlapping beacons)
 then reconstructing a 3d map relative to that orientation
-
 
 Rotations of cube while considering each side as the base
 6 sides * 4 orientations each = 24 total orientations
@@ -32,66 +15,39 @@ Rotations of cube while considering each side as the base
 Start at x, y, z (i.e. assume the current orientation of the scanner
 being evaluated is identical to that of scanner 0)
 
-bottom
+iterate through known beacons in the map (scanners[0] at the start).
+Then for unsolved scanners (not added to the map yet), how many overlapping
+beacons are there in the current orientation if scanners[1][0] and
+scanners[0][0] point to the same beacon?
 
- x,  y,  z
- x,  y, -z
--x,  y, -z
--x,  y,  z
+To find 12 overlapping beacons we first make the entire scanner relative
+to the base scanner by taking a base coord and subtracting the scanner coord
+(travel along its vector back to its origin) that gives us the offset we add
+to all beacon coords in a scanner to make them relative to the base scanner.
+From here we compare that scanner against each scanner in scanner_map,
+if >= 12 beacons match any scanner in the scanner_map we add that scanner
+to the scanner_map and its beacons to the full_beacon_set.
 
-top
+Repeat for each 24 orientations
 
--x, -y, -z
--x, -y,  z
- x, -y,  z
- x, -y, -z
-
-right
-
- y, -x, -z
- y,  x, -z
- y, -x,  z
- y,  x,  z
-
-left
-
--y, -x, -z
--y,  x, -z
--y,  x,  z
--y, -x,  z
-
-back
-
- x, -z, -y
--x, -z, -y
--x,  z, -y
- x,  z, -y
-
-front
-
--x, -z,  y
--x,  z,  y
- x,  z,  y
- x, -z,  y
-
-iterate through scanner_0, how many matches do we have in the current orientation
-if scanner[0] and scanner_0[0] point to the same point
-
-then 2nd orientation, scanner[0] + scanner_0[0] point to same point?
-then 3nd orientation, scanner[0] + scanner_0[0] point to same point?
-...
-
-finally 24th orientation,
-
-now scanner[1] and scanner_0[0]
+... 2nd orientation, if scanners[0][0] + scanners[1][0] point to same beacon?
+... 3nd orientation, if scanners[0][0] + scanners[1][0] point to same beacon?
 
 ...
 
-finally scanner[len(scanner) - 1] and scanner_0[0]
+... 24th orientation,
+
+now repeat for scanners[1][1] and scanners[0][0]
 
 ...
 
-repeat all with scanner_0[1] ... e.t.c
+finally scanners[1][len(scanner) - 1] and scanners[0][0]
+
+...
+
+repeat with every beacon that we know exists in the map (full_beacon_set).
+
+Need to rerun until all scanners are mapped
 
 -----------------
 
@@ -106,4 +62,8 @@ scanner[0] and scanner[1] exist in the map
 condition for scanners[2] joining the map is sharing 12 common points with either
 scanner[0] or scanner[1] ... e.t.c.
 
-Need to rerun the process until all beacons are mapped
+-----------------
+
+Solved part1 for test.txt
+
+using input.txt takes an unreasonable amount of time but solves part1 correctly
