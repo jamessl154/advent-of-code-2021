@@ -224,8 +224,6 @@ def check_match_in_scanner_map(scanner):
         for j in scanner:
             if j in scanner_map[i]:
                 counter += 1
-                # if counter > 1:
-                    # print(counter)
 
         if counter >= 12:
             return scanner
@@ -248,6 +246,7 @@ def find12commonbeacons(scanner, base_coord):
         result = check_match_in_scanner_map(temp)
 
         if result:
+            result = ((x_offset, y_offset, z_offset), result)
             return result
 
 def solve_scanner(scanner, base_coord):
@@ -280,6 +279,8 @@ scanners_missing = []
 for i in range(1, len(scanners)):
     scanners_missing.append(i)
 
+scanner_coordinates = [(0, 0, 0)]
+
 def main():
 
     # keeps tracks of all unique points in 3d region relative to scanners[0] at 0,0,0
@@ -299,17 +300,15 @@ def main():
 
             if result:
 
-                # print(i)
-                # print("------")
+                scanner_coordinate, result = result
+
+                scanner_coordinates.append(scanner_coordinate)
+
                 # Add to the scanner map
                 scanner_map.append(result)
                 
-                # print("before")
-                # print(scanners_missing)
                 # remove from missing scanners
                 scanners_missing.remove(i)
-                # print("after")
-                # print(scanners_missing)
 
                 for j in result:
                     x, y, z = j
@@ -318,8 +317,22 @@ def main():
 
     full_beacon_set = sorted(full_beacon_set, key=lambda x: x[0])
 
-    print(len(scanner_map))
+    print("scanner_coordinates\n", scanner_coordinates)
+    print("len(scanner_map)", len(scanner_map))
     print("full_beacon_set\n", full_beacon_set)
     print("part1", len(full_beacon_set))
+
+    manhattan_record = 0
+
+    for i in range(len(scanner_coordinates)):
+        for j in range(i, len(scanner_coordinates)):
+            if i == j:
+                continue
+            manhattan_x = abs(scanner_coordinates[i][0] - scanner_coordinates[j][0])
+            manhattan_y = abs(scanner_coordinates[i][1] - scanner_coordinates[j][1])
+            manhattan_z = abs(scanner_coordinates[i][2] - scanner_coordinates[j][2])
+            manhattan_record = max(manhattan_x + manhattan_y + manhattan_z, manhattan_record)
+
+    print("part2", manhattan_record)
 
 main()
