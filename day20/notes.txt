@@ -1,0 +1,37 @@
+# light pixel
+. dark pixel
+
+Each pixel in input image simultaneously has its 3x3 surrounding grid
+evaluated to determine what pixel it will be converted to in the output
+
+row 1 + row 2 + row 3, single binary string, . 0's # 1's
+
+convert binary to decimal, use as index in image enhancement algorithm
+
+to determine whether the output pixel is a light or dark pixel
+
+input image is infinite size and needs to be enhanced twice
+
+3x3 grids of .'s will make a binary string of 0 and can be ignored,
+any 3x3 grid with a # in it cannot be ignored
+
+part1
+
+running the algorithm twice, the bounds of the maximum area we need to consider
+is +2 in each direction
+
+assuming part2 is going to ask to enhance many more times,
+need to build a robust solution
+
+the image_enhancement_algorithm in input.txt has:
+    1. '#' at index 0 which means any 3x3 full of '.'s becomes '#'
+        because the binary string '000000000' is 0
+    2. '.' at index 511 which reverses the operation on the next step
+        because the binary string '111111111' is 511
+
+on sequences 1, 3, 5 e.t.c need to assume the outer layer is '#'
+we can isolate this within to_binary_string_3x3
+
+the script doesn't solve test.txt correctly because we configured
+it to account for the blinking infinite '#'s of input.txt's
+image_enhancement_algorithm
