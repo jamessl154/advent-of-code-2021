@@ -21,6 +21,8 @@ def to_binary_string_3x3(i, j, min_row, max_row, min_col, max_col, sequences):
 
     for a in range(i - 1, i + 2):
         for b in range(j - 1, j + 2):
+            # On odd sequences if a 3x3 grid spot is out of the bounds, add a 1 in that spot
+            # due to the blinking infinite light pixels from index 0 of image_enhancement_algorithm in input.txt
             if sequences % 2 != 0:
                 if a < min_row or a > max_row:
                     temp.append("1")
@@ -38,8 +40,10 @@ sequences = 0
 # part1 sequences < 2
 while sequences < 50:
 
+    # save changes and only manipulate the pixel_dict after finding all 1's to insert
     pixel_changes = []
 
+    # make a copy of the previous pixel_dict
     pixel_dict_copy = deepcopy(pixel_dict)
 
     min_row = 0
@@ -55,6 +59,7 @@ while sequences < 50:
                 min_col = min(min_col, j)
                 max_col = max(max_col, j)
 
+    # since the image is infinite, we restrict the area around light pixels
     for i in range(min_row - 1, max_row + 2):
         for j in range(min_col - 1, max_col + 2):
 
@@ -69,6 +74,7 @@ while sequences < 50:
 
     pixel_dict.clear()
 
+    # apply changes to an empty dictionary
     for i in pixel_changes:
         pixel, coords = i
         x, y = coords
