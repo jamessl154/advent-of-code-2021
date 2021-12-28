@@ -1,0 +1,39 @@
+Dirac dice
+
+deterministic dice, 1-100 
+
+part 2
+
+p1 roll 3 times, sums die value, moves by sum, adds board value to score
+p2 " "
+
+Dirac dice value can be 1, 2 or 3 only
+
+1 2 3, move + add score, 2 1 2, ... , 3 1 2, ... , 3 1 2 e.t.c.
+Until score >= 21
+
+import itertools
+
+print(list(itertools.combinations_with_replacement(range(1, 4), 3)))
+
+[(1, 1, 1), (1, 1, 2), (1, 1, 3), (1, 2, 2), (1, 2, 3), (1, 3, 3), (2, 2, 2), (2, 2, 3), (2, 3, 3), (3, 3, 3)]
+
+(1, 2, 3)
+
+123, 132, 213, 231, 321, 312
+
+6 permuations for 3 unique numbers
+3 permuations for 2 unique numbers
+1 permutation for 1 unique number
+
+potential sums of dice rolls
+
+3: (1, 1, 1)            1 permutation
+4: (1, 1, 2)            3 permuations
+5: (1, 1, 3) (1, 2, 2)  6 permuations
+6: (1, 2, 3) (2, 2, 2)  7 permuations
+7: (1, 3, 3) (2, 2, 3)  6 permuations
+8: (2, 3, 3)            3 permuations
+9: (3, 3, 3)            1 permuation
+
+                        27 permutations
