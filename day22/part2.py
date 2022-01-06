@@ -18,9 +18,9 @@ cuboid_step = list(map(lambda x: list(map(lambda y: list(map(lambda z: int(z), y
 # cut into pieces, discard overlap and input cuboid, add remaining
 # pieces to the cuboid map
 
-# safe to sum areas once we know we have no collisions
-# For each cuboid in cuboid map, sum += cuboid area, return sum
 def sum_area_cuboids(cuboid_map):
+  # For each cuboid in cuboid map, sum += cuboid area, return sum
+  # safe to sum areas once we know we have no collisions
 
   sum = 0
 
@@ -32,8 +32,8 @@ def sum_area_cuboids(cuboid_map):
 
 assert sum_area_cuboids([[[10, 12], [10, 12], [10, 12]]]) == 27
 
-# returns a list of the cuboids that overlap
-def overlapping_cuboids(input_cuboid, cuboids):
+def find_overlapping_cuboids(input_cuboid, cuboids):
+  # returns a list of the cuboids that overlap the input_cuboid
 
   overlapping_cuboids = []
 
@@ -61,15 +61,15 @@ def overlapping_cuboids(input_cuboid, cuboids):
 
   return overlapping_cuboids
 
-assert overlapping_cuboids(
+assert find_overlapping_cuboids(
   [[10, 10], [10, 10], [10, 10]],
   [[[10, 12], [10, 12], [10, 12]], [[11, 13], [11, 13], [11, 13]], [[9, 11], [9, 11], [9, 11]]]
   ) == [[[10, 12], [10, 12], [10, 12]], [[9, 11], [9, 11], [9, 11]]]
 
 def find_overlap_zone(cuboid_A, cuboid_B):
   # takes 2 cuboids and returns their overlap zone as a cuboid.
-  # for each overlapping cuboid we are assuming single overlap zone,
-  # asserting it is impossible for the same 2 cuboids to overlap more than once
+  # For each overlapping cuboid we are assuming single overlap zone,
+  # asserting it's impossible for the same 2 cuboids to overlap more than once
 
   a = max(cuboid_A[0][0], cuboid_B[0][0])
   b = min(cuboid_A[0][1], cuboid_B[0][1])
@@ -101,6 +101,10 @@ def fragment_cuboid(overlap_zone, cuboid):
   for boundary in overlap_zone[0]:
     if boundary not in x_boundaries:
       x_boundaries.append(boundary)
+
+  # test.txt, error where the overlap zone is 1 square wide [[5, 5], ... ]
+  if overlap_zone[0][0] == overlap_zone[0][1]:
+    x_boundaries.append(overlap_zone[0][0])
 
   x_boundaries.sort()
 
@@ -159,30 +163,65 @@ def fragment_cuboid(overlap_zone, cuboid):
 
 assert len(fragment_cuboid([[4, 6], [4, 6], [4, 6]], [[0, 10], [0, 10], [0, 10]])) == 6
 
-# def fully_overlapped(cuboid, cuboid_map):
+def is_fully_overlapped(cuboid, cuboid_map):
+  # return boolean depending on if this cuboid is fully overlapped by any cuboid in the cuboid map
 
-#   for i in cuboid_map:
-    
+  for map_cuboid in cuboid_map:
+
+    x_range = range(map_cuboid[0][0], map_cuboid[0][1] + 1)
+    y_range = range(map_cuboid[1][0], map_cuboid[1][1] + 1)
+    z_range = range(map_cuboid[2][0], map_cuboid[2][1] + 1)
+
+    if cuboid[0][0] in x_range and cuboid[0][1] in x_range:
+      if cuboid[1][0] in y_range and cuboid[1][1] in y_range:
+        if cuboid[2][0] in z_range and cuboid[2][1] in z_range:
+          return True
+
+def resolve_overlapping_cuboids(cuboid, cuboid_map, on_off, overlap_set):
+  # First need to gather cuboids into a list to be removed, finally remove after all overlapping cuboids resolved
+
+  if on_off == 'on':
+    on_off = 'off'
+  elif on_off == 'off':
+    on_off = 'on'
+
+  overlapping_cuboids_map = []
+
+  overlapping_cuboids_map.extend(add_cuboid_to_cuboid_map(overlap_set[0], [cuboid], on_off))
+  cuboid_map.remove(overlap_set[0])
+  overlap_set.remove(overlap_set[0])
+
+  for overlapping_cuboid in overlap_set:
+    # remove from the cuboid map, process into fragments, add fragments back
+    cuboid_map.remove(overlapping_cuboid)
+    overlapping_cuboids_map.extend(add_cuboid_to_cuboid_map(overlapping_cuboid, overlapping_cuboids_map, on_off))
+
+  return overlapping_cuboids_map
 
 def add_cuboid_to_cuboid_map(cuboid, cuboid_map, on_off):
-  # takes 1 cuboid, slices and returns the cuboids needed for the cuboid map
+  # takes 1 cuboid input step, evaluates it by
+  # slicing it and overlapping cuboids if necessary,
+  # returns resultant cuboids
 
-  overlap_set = overlapping_cuboids(cuboid, cuboid_map)
+  overlap_set = find_overlapping_cuboids(cuboid, cuboid_map)
 
   cuboids = []
 
-  # TODO if "on" and fully surrounded by overlapping cuboid, return []
-  # avoid unecessary evaluation
-  # if on_off == 'on' and fully_overlapped(cuboid, cuboid_map) == True:
-  #   return []
-
+  # if "on" and fully surrounded by overlapping cuboid, result cuboids are empty, avoids unecessary evaluation
+  if on_off == 'on' and is_fully_overlapped(cuboid, cuboid_map) == True:
+    return []
+  # no overlapping cuboids and "on"
   if on_off == 'on' and not overlap_set:
     return [cuboid]
+  # no overlapping cuboids and "off"
   if on_off == 'off' and not overlap_set:
     return []
 
-  # Base case
+  # 1 overlapping cuboid
   if len(overlap_set) == 1:
+    # Remove the overlapping cuboid from the cuboid_map
+    cuboid_map.remove(overlap_set[0])
+
     overlap_zone = find_overlap_zone(overlap_set[0], cuboid)
 
     overlap_fragments = fragment_cuboid(overlap_zone, overlap_set[0])
@@ -199,32 +238,20 @@ def add_cuboid_to_cuboid_map(cuboid, cuboid_map, on_off):
 
     return cuboids
 
-  result_cuboids = []
-
-  # For each overlapping cuboid, solve it by splitting into cuboids which it returns,
-  # those cuboids will be cumulatively passed to the next overlapping cuboid
-  # finally when all overlapping cuboids are solved, add result_cuboids to the cuboids list
-  for overlapping_cuboid in overlap_set:
-    # remove from the cuboid map, process into fragments, add fragments back
-    cuboid_map.remove(overlapping_cuboid)
-    result_cuboids = add_cuboid_to_cuboid_map(overlapping_cuboid, result_cuboids, on_off)
+  # more than 1 overlapping cuboid
+  result_cuboids = resolve_overlapping_cuboids(cuboid, cuboid_map, on_off, overlap_set)
 
   cuboids.extend(result_cuboids)
 
   return cuboids
 
-# for each overlapping cuboid, slice() with list of sliced cuboids
-
-# The first slice() gets passed a list with 1 cuboid, that cuboid gets divided,
-# slice returns a list of slices and that list is passed on to the next slice()
-# until the overlapping cuboids are exhausted
-
 def main():
+  # adds each cuboid_step to a cuboid_map, resolving collisions and finally summing the area
 
   cuboid_map = []
 
-  for i in range(len(cuboid_step)):
-    cuboids = add_cuboid_to_cuboid_map(cuboid_step[i], cuboid_map, on_off_step[i])
+  for step_index in range(len(cuboid_step)):
+    cuboids = add_cuboid_to_cuboid_map(cuboid_step[step_index], cuboid_map, on_off_step[step_index])
     cuboid_map.extend(cuboids)
 
   print("part2", sum_area_cuboids(cuboid_map))
