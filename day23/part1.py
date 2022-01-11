@@ -1,19 +1,11 @@
 from collections import defaultdict
 from heapq import heappush, heappop
-
 # Great Visualiser: https://aochelper2021.blob.core.windows.net/day23/index.html
 
-# global rule: cannot stop outside of any room
+# global forbidden moves, cannot stop outside of any room
 forbidden_moves = [16, 18, 20, 22]
-
 # global amphipod goals, values are the indices of the correct side room positions for key amphipod
-amphipod_goals = {
-  'A': [29, 42],
-  'B': [31, 44],
-  'C': [33, 46],
-  'D': [35, 48]
-}
-
+amphipod_goals = { 'A': [29, 42], 'B': [31, 44], 'C': [33, 46], 'D': [35, 48] }
 # global hallway 14-24
 hallway = range(14, 25)
 
@@ -31,21 +23,20 @@ def dfs_move(spot_index, amphipod, start_index, a_map, seen, start=False):
     return []
 
   moves = []
-
-  # empty space found
-  if a_map[spot_index] == '.':
-    # can't stop directly outside a room
-    if spot_index not in forbidden_moves:
-      back_of_side_room_index = amphipod_goals[amphipod][1]
-      # always allow move to the back of the side room
-      if spot_index == back_of_side_room_index:
+  # empty space found not directly outside a room
+  if a_map[spot_index] == '.' and spot_index not in forbidden_moves:
+    back_of_side_room_index = amphipod_goals[amphipod][1]
+    # always allow move to the back of the side room
+    if spot_index == back_of_side_room_index:
+      moves.append(spot_index)
+    # allow move to index 0 of amphipod_goals, the front of the side room, if the back is filled with the same type of amphipod but not this one
+    elif spot_index == amphipod_goals[amphipod][0]:
+      # Stop infinite loop moving from back to front of side room
+      if a_map[back_of_side_room_index] == amphipod and start_index != back_of_side_room_index:
         moves.append(spot_index)
-      # allow move to index 0 of amphipod_goals, the front of the side room, if the back is filled with the same amphipod
-      elif spot_index == amphipod_goals[amphipod][0] and a_map[back_of_side_room_index] == amphipod:
-        moves.append(spot_index)
-      # all amphipods starting in the hallway have already moved and cannot move unless into their destination
-      elif start_index not in hallway:
-        moves.append(spot_index)
+    # all amphipods starting in the hallway have already moved and cannot move unless into their destination
+    elif start_index not in hallway:
+      moves.append(spot_index)
 
   # down up right left
   for move in dfs_move(spot_index + 13, amphipod, start_index, a_map, seen):
