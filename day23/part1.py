@@ -1,3 +1,6 @@
+from collections import defaultdict
+from heapq import heappush, heappop
+
 # https://aochelper2021.blob.core.windows.net/day23/index.html
 # http://theory.stanford.edu/~amitp/GameProgramming/MovingObstacles.html
 # What to do if we have no more possible moves? (everywhere is blocked)
@@ -118,7 +121,7 @@ def get_all_valid_moves(amphipods, a_map):
   return moves
 
 def main():
-  puzzle_input  = [line.replace("\n", "") for line in open('test.txt').readlines()]
+  puzzle_input  = "".join([line.replace("\n", "") for line in open('test.txt').readlines()])
   # print(puzzle_input)
 
   amphipods = []
@@ -135,9 +138,50 @@ def main():
         case 'D':
           amphipods.append(Desert(row, col))
 
-  # print(amphipods)
-  # for amphipod in amphipods:
-  #   print(amphipod.row, amphipod.col, type(amphipod).__name__)
+  start = puzzle_input
+  end = '#############,#...........#,###A#B#C#D###,  #A#B#C#D#  ,  #########  '
+
+  # a = '##############...........####B#C#B#D###  #A#D#C#A#    #########  '
+  # for i in range(len(a)):
+  #     print(i // 13, i % 13)
+  # for dfs between rows we can add or subtract 13 to find the next row
+
+  # Nodes that are the same will have the same amphipod map
+  # Would they also have the same moved amphipods?
+  # No, if our moves are always valid the only way to get to that state would be moving
+  visited = set()
+
+  # Notice that all amphipods in the hallway cannot move unless into their destination
+  # if in (1,1),(1,2),(1,4),(1,6),(1,8),(1,10),(1,11)
+
+  queue = [(0, start)]
+
+  min_energy_cost = defaultdict(lambda: float("inf"), {start: 0})
+
+  while queue:
+
+    node = heappop(queue)
+
+    # cumulative_energy, state = node
+
+    # if state represents the end game state
+    # if state == end:
+    #   print(cumulative_energy)
+    #   break
+
+    # visited.add(state)
+
+    # next_states = get_all_valid_moves()
+    # From this state. should return maps of all valid next states and their energy costs
+
+    # for state in next_states:
+    #   energy_cost, map = state
+    #   if map in visited:
+    #     continue
+    #   new_energy_cost = cumulative_energy + energy_cost
+    #   if new_energy_cost < min_energy_cost[state]:
+    #     min_energy_cost[state] = new_energy_cost
+    #     heappush(queue, (new_energy_cost, state))
 
 if __name__ == '__main__':
   main()
