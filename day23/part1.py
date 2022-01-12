@@ -10,16 +10,12 @@ amphipod_goals = { 'A': [29, 42], 'B': [31, 44], 'C': [33, 46], 'D': [35, 48] }
 hallway = range(14, 25)
 
 def dfs_move(spot_index, amphipod, start_index, a_map, seen, start=False):
-  # Prevent infinite DFS by returning when visiting a spot already evaluated
-  if spot_index in seen:
+  if spot_index in seen: # Prevent infinite DFS by returning when visiting a spot already evaluated
     return []
-  # add spot_index to seen list
-  seen.append(spot_index)
-  # We don't want to evaluate the start position
-  if start == True:
+  seen.append(spot_index) # add spot_index to seen list
+  if start == True: # We don't want to evaluate the start position
     pass
-  # return when we reach a non-empty space
-  elif a_map[spot_index] != '.':
+  elif a_map[spot_index] != '.': # return when we reach a non-empty space
     return []
 
   moves = []
@@ -38,19 +34,18 @@ def dfs_move(spot_index, amphipod, start_index, a_map, seen, start=False):
       #   2. A2 must be at the back of the first side room
       if a_map[back_of_side_room_index] == amphipod and start_index != back_of_side_room_index:
         moves.append(spot_index)
-    # all amphipods starting in the hallway have already moved and cannot move unless into their destination
-    # otherwise only allowing moves into the hallway
+    # all amphipods starting in the hallway have already moved and cannot move unless into their destination.
+    # Otherwise only allowing moves into the hallway from side rooms
     elif start_index not in hallway and spot_index in hallway:
       moves.append(spot_index)
 
-  # down up right left
-  for move in dfs_move(spot_index + 13, amphipod, start_index, a_map, seen):
+  for move in dfs_move(spot_index + 13, amphipod, start_index, a_map, seen): # down
     moves.append(move)
-  for move in dfs_move(spot_index - 13, amphipod, start_index, a_map, seen):
+  for move in dfs_move(spot_index - 13, amphipod, start_index, a_map, seen): # up
     moves.append(move)
-  for move in dfs_move(spot_index + 1, amphipod, start_index, a_map, seen):
+  for move in dfs_move(spot_index + 1, amphipod, start_index, a_map, seen): # right
     moves.append(move)
-  for move in dfs_move(spot_index - 1, amphipod, start_index, a_map, seen):
+  for move in dfs_move(spot_index - 1, amphipod, start_index, a_map, seen): # left
     moves.append(move)
 
   return moves
@@ -66,59 +61,75 @@ def get_energy_cost(amphipod, old_index, new_index):
       energy_cost_per_move = 100
     case 'D':
       energy_cost_per_move = 1000
-  vertical_distance = abs(old_index // 13 - new_index // 13)
-  horizontal_distance = abs(old_index % 13 - new_index % 13)
-  return (vertical_distance + horizontal_distance) * energy_cost_per_move
+  move_counter = 0
+  old_row = old_index // 13
+  old_col = old_index % 13
+  new_row = new_index // 13
+  new_col = new_index % 13
+  # Going from side room into side room
+  if old_index not in hallway and new_index not in hallway:
+    move_counter += (old_row - 1) + (new_row - 1) # 2 vertical moves: side room to hallway + hallway to side room. The 1 is the hallway row
+    move_counter += abs(old_col - new_col) # horizontally in the hallway
+  # Going from hallway into side room and side room into hallway
+  else:
+    # any combination of:
+    move_counter += abs(old_row - new_row) # up/down
+    move_counter += abs(old_col - new_col) # left/right
+  return move_counter * energy_cost_per_move
 
 def create_new_state(str_amphipod_map, old_index, new_index):
-  # convert to list
-  l = list(str_amphipod_map)
-  # swap
-  l[old_index], l[new_index] = l[new_index], l[old_index]
-  # return as a string
-  return "".join(l)
+  l = list(str_amphipod_map) # convert to list
+  l[old_index], l[new_index] = l[new_index], l[old_index]  # swap values at indices
+  return "".join(l) # return as a string
 
 def get_all_valid_moves(amphipod_map):
   moves = []
   for spot_index in range(len(amphipod_map)):
-    # alphabetical test, ABCD amphipods
-    if amphipod_map[spot_index].isalpha():
+    if amphipod_map[spot_index].isalpha():# alphabetical test, ABCD amphipods
       amphipod = amphipod_map[spot_index]
-      # can return empty list if no valid moves
-      for move in dfs_move(spot_index, amphipod, spot_index, amphipod_map, [], True):
+      for move in dfs_move(spot_index, amphipod, spot_index, amphipod_map, [], True): # can return empty list if no valid moves
         new_index = move
         # create new string by swapping the old with new index to simulate a move, we only ever move amphipod to empty space '.' 
         new_state = create_new_state(amphipod_map, spot_index, new_index)
-        # get the energy cost of the move and append tuple to moves list
+        # bundle the energy cost of the move and the new state, then append tuple to moves list
         moves.append((get_energy_cost(amphipod, spot_index, new_index), new_state))
   return moves
 
 def main():
-  puzzle_input  = "".join([line.replace("\n", "") for line in open('test.txt').readlines()])
-
+  puzzle_input  = "".join([line.replace("\n", "") for line in open('input.txt').readlines()])
+  # representing the map as a string, to traverse rows +/- 13 to index, to traverse columns +/- 1 to index
   start = puzzle_input
   end = '##############...........####A#B#C#D###  #A#B#C#D#    #########  '
 
-  # Nodes that are the same will have the same amphipod map
-  # Would they also have the same moved amphipods?
-  # No, if our moves are always valid the only way to get to that state would be moving
-  visited = set()
+  visited = set() # Storing visited nodes in a set to prevent infinite evaluation
 
-  queue = [(0, start)]
+  queue = [(0, start)] # Initial node
 
-  # creates a defaultdict with default value (tentative energy value) as infinity
-  # except {start: 0}, the energy cost of the initial state is zero
+  last = {} # last dict: key is the node in question, value is updated to be the previous node when following path of least cost
+
+  # creates a defaultdict with default value (tentative energy value) as infinity for all nodes except {start: 0}, the energy cost of the initial state is zero
   min_energy_cost = defaultdict(lambda: float("inf"), {start: 0})
 
   while queue:
 
-    node = heappop(queue)
+    node = heappop(queue) # get node with lowest energy cost
 
-    cumulative_energy, state = node
+    cumulative_energy, state = node # unpack tuple
 
-    # if state represents the end game state
-    if state == end:
-      print(cumulative_energy)
+    if state == end: # if state represents the end game state
+      current = state
+      node_path = [current]
+      while current in last: # Traverse backwards through last and prints the node path taken
+        current = last[current]
+        node_path.append(current)
+      print("Node path:")
+      for i in range(len(node_path) - 1, -1, -1):
+        for j in range(len(node_path[i])):
+          print(node_path[i][j], end="")
+          if (j + 1) % 13 == 0 and j != 0:
+            print("")
+        print("")
+      print("part1:", cumulative_energy) # the least energy required to organize the amphipods
       return
 
     visited.add(state)
@@ -129,18 +140,17 @@ def main():
     #   first argument energy cost of going from old to new state
     #   second argument the new state as a string
 
-    # can reach dead end if no next states, the next node from the queue will then be evaluated
-    for next_state in next_states:
+    for next_state in next_states: # can reach dead end if no next states, the next node from the queue will then be evaluated
       energy_cost, state_map = next_state
-      if state_map in visited:
+      if state_map in visited: # Don't repeat evaluated nodes
         continue
       new_energy_cost = cumulative_energy + energy_cost
-      if new_energy_cost < min_energy_cost[state_map]:
-        min_energy_cost[state_map] = new_energy_cost
-        heappush(queue, (new_energy_cost, state_map))
+      if new_energy_cost < min_energy_cost[state_map]: # Found new min cost from start going through node to neighbour node
+        last[state_map] = state # update last
+        min_energy_cost[state_map] = new_energy_cost # update cost from start to this node
+        heappush(queue, (new_energy_cost, state_map)) # push to queue to be evaluated
 
-  # if the queue empties then the problem is unsolvable
-  print("unsolvable")
+  print("unsolvable") # if the queue empties then the problem is unsolvable
 
 if __name__ == '__main__':
   main()
