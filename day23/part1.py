@@ -6,7 +6,7 @@ from heapq import heappush, heappop
 forbidden_moves = [16, 18, 20, 22]
 # global amphipod goals, values are the indices of the correct side room positions for key amphipod
 amphipod_goals = { 'A': [29, 42], 'B': [31, 44], 'C': [33, 46], 'D': [35, 48] }
-# global hallway 14-24
+# global hallway indices 14-24 inclusive
 hallway = range(14, 25)
 
 def dfs_move(spot_index, amphipod, start_index, a_map, seen, start=False):
@@ -26,16 +26,21 @@ def dfs_move(spot_index, amphipod, start_index, a_map, seen, start=False):
   # empty space found not directly outside a room
   if a_map[spot_index] == '.' and spot_index not in forbidden_moves:
     back_of_side_room_index = amphipod_goals[amphipod][1]
-    # always allow move to the back of the side room
+    # always allow move to the back of the side room if its possible to path there
     if spot_index == back_of_side_room_index:
       moves.append(spot_index)
     # allow move to index 0 of amphipod_goals, the front of the side room, if the back is filled with the same type of amphipod but not this one
     elif spot_index == amphipod_goals[amphipod][0]:
-      # Stop infinite loop moving from back to front of side room
+      # Need to stop infinite loop moving from back to front of side room
+      # e.g. 1 of the amber amphipods, A1, paths to the empty space at the front of the first side room.
+      # For this to be a valid move:
+      #   1. A1 must not be at the back of the first side room
+      #   2. A2 must be at the back of the first side room
       if a_map[back_of_side_room_index] == amphipod and start_index != back_of_side_room_index:
         moves.append(spot_index)
     # all amphipods starting in the hallway have already moved and cannot move unless into their destination
-    elif start_index not in hallway:
+    # otherwise only allowing moves into the hallway
+    elif start_index not in hallway and spot_index in hallway:
       moves.append(spot_index)
 
   # down up right left
@@ -61,15 +66,17 @@ def get_energy_cost(amphipod, old_index, new_index):
       energy_cost_per_move = 100
     case 'D':
       energy_cost_per_move = 1000
-  diff = abs(new_index - old_index)
-  vertical_distance = diff // 13
-  horizontal_distance = diff % 13
+  vertical_distance = abs(old_index // 13 - new_index // 13)
+  horizontal_distance = abs(old_index % 13 - new_index % 13)
   return (vertical_distance + horizontal_distance) * energy_cost_per_move
 
 def create_new_state(str_amphipod_map, old_index, new_index):
-  list_amphipod_map = list(str_amphipod_map)
-  list_amphipod_map[old_index], list_amphipod_map[new_index] = list_amphipod_map[new_index], list_amphipod_map[old_index]
-  return "".join(list_amphipod_map)
+  # convert to list
+  l = list(str_amphipod_map)
+  # swap
+  l[old_index], l[new_index] = l[new_index], l[old_index]
+  # return as a string
+  return "".join(l)
 
 def get_all_valid_moves(amphipod_map):
   moves = []
@@ -80,7 +87,7 @@ def get_all_valid_moves(amphipod_map):
       # can return empty list if no valid moves
       for move in dfs_move(spot_index, amphipod, spot_index, amphipod_map, [], True):
         new_index = move
-        # create new string by swapping the old with new index, we only ever move amphipod to empty space '.' 
+        # create new string by swapping the old with new index to simulate a move, we only ever move amphipod to empty space '.' 
         new_state = create_new_state(amphipod_map, spot_index, new_index)
         # get the energy cost of the move and append tuple to moves list
         moves.append((get_energy_cost(amphipod, spot_index, new_index), new_state))
@@ -124,13 +131,13 @@ def main():
 
     # can reach dead end if no next states, the next node from the queue will then be evaluated
     for next_state in next_states:
-      energy_cost, state = next_state
-      if state in visited:
+      energy_cost, state_map = next_state
+      if state_map in visited:
         continue
       new_energy_cost = cumulative_energy + energy_cost
-      if new_energy_cost < min_energy_cost[state]:
-        min_energy_cost[state] = new_energy_cost
-        heappush(queue, (new_energy_cost, state))
+      if new_energy_cost < min_energy_cost[state_map]:
+        min_energy_cost[state_map] = new_energy_cost
+        heappush(queue, (new_energy_cost, state_map))
 
   # if the queue empties then the problem is unsolvable
   print("unsolvable")

@@ -1,7 +1,7 @@
 from itertools import product
 from functools import lru_cache
 
-#  Help from: https://github.com/mebeim/aoc/blob/master/2021/README.md#day-21---dirac-dice
+#  Solution from: https://github.com/mebeim/aoc/blob/master/2021/README.md#day-21---dirac-dice
 
 p1_pos = 5
 p2_pos = 3
