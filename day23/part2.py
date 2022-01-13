@@ -1,11 +1,14 @@
 from collections import defaultdict
 from heapq import heappush, heappop
+
+# Part2 can use the same model as part1 with some changes to amphipod_goals and rules of movement in dfs_move()
+
 # Great Visualiser: https://aochelper2021.blob.core.windows.net/day23/index.html
 
 # global forbidden moves, cannot stop outside of any room
 forbidden_moves = [16, 18, 20, 22]
 # global amphipod goals, values are the indices of the correct side room positions for key amphipod
-amphipod_goals = { 'A': [29, 42], 'B': [31, 44], 'C': [33, 46], 'D': [35, 48] }
+amphipod_goals = { 'A': [29, 42, 55, 68], 'B': [31, 44, 57, 70], 'C': [33, 46, 59, 72], 'D': [35, 48, 61, 74] }
 # global hallway indices 14-24 inclusive
 hallway = range(14, 25)
 
@@ -21,19 +24,23 @@ def dfs_move(spot_index, amphipod, start_index, a_map, seen, start=False):
   moves = []
   # empty space found not directly outside a room
   if a_map[spot_index] == '.' and spot_index not in forbidden_moves:
-    back_of_side_room_index = amphipod_goals[amphipod][1]
+    a_goal = amphipod_goals[amphipod]
     # always allow move to the back of the side room if its possible to path there
-    if spot_index == back_of_side_room_index:
+    if spot_index == a_goal[3]:
       moves.append(spot_index)
-    # allow move to index 0 of amphipod_goals, the front of the side room, if the back is filled with the same type of amphipod but not this one
-    elif spot_index == amphipod_goals[amphipod][0]:
-      # Need to stop infinite loop moving from back to front of side room
-      # e.g. 1 of the amber amphipods, A1, paths to the empty space at the front of the first side room.
-      # For this to be a valid move:
-      #   1. A1 must not be at the back of the first side room
-      #   2. A2 must be at the back of the first side room
-      if a_map[back_of_side_room_index] == amphipod and start_index != back_of_side_room_index:
+    # Each move into side room requires all amphipods underneath to be the same type
+    elif spot_index == a_goal[2] and start_index not in a_goal: # Prevent infinite pathing up and down a side room
+      if a_map[a_goal[3]] == amphipod: # back filled correctly
         moves.append(spot_index)
+    elif spot_index == a_goal[1] and start_index not in a_goal:
+      if a_map[a_goal[3]] == amphipod: # back filled correctly
+        if a_map[a_goal[2]] == amphipod: # penultimate from back filled correctly
+          moves.append(spot_index)
+    elif spot_index == a_goal[0] and start_index not in a_goal:
+      if a_map[a_goal[3]] == amphipod: # back filled correctly
+        if a_map[a_goal[2]] == amphipod: # penultimate from back filled correctly
+          if a_map[a_goal[1]] == amphipod: # penultimate from front filled correctly
+            moves.append(spot_index)
     # all amphipods starting in the hallway have already moved and cannot move unless into their destination.
     # Otherwise only allowing moves into the hallway from side rooms
     elif start_index not in hallway and spot_index in hallway:
@@ -85,7 +92,7 @@ def create_new_state(str_amphipod_map, old_index, new_index):
 def get_all_valid_moves(amphipod_map):
   moves = []
   for spot_index in range(len(amphipod_map)):
-    if amphipod_map[spot_index].isalpha():# alphabetical test, ABCD amphipods
+    if amphipod_map[spot_index].isalpha(): # alphabetical test, ABCD amphipods
       amphipod = amphipod_map[spot_index]
       for move in dfs_move(spot_index, amphipod, spot_index, amphipod_map, [], True): # can return empty list if no valid moves
         new_index = move
@@ -110,10 +117,10 @@ def print_results(current, last, part, cumulative_energy):
   print(part, cumulative_energy) # the least energy required to organize the amphipods
 
 def main():
-  puzzle_input  = "".join([line.replace("\n", "") for line in open('input.txt').readlines()])
+  puzzle_input  = "".join([line.replace("\n", "") for line in open('input_part2.txt').readlines()])
   # representing the map as a string, to traverse rows +/- 13 to index, to traverse columns +/- 1 to index
   start = puzzle_input
-  end = '##############...........####A#B#C#D###  #A#B#C#D#    #########  '
+  end = '##############...........####A#B#C#D###  #A#B#C#D#    #A#B#C#D#    #A#B#C#D#    #########  '
 
   visited = set() # Storing visited nodes in a set to prevent infinite evaluation
 
@@ -131,7 +138,7 @@ def main():
     cumulative_energy, state = node # unpack tuple
 
     if state == end: # if state represents the end game state
-      print_results(state, last, "part1", cumulative_energy)
+      print_results(state, last, "part2", cumulative_energy)
       return
 
     visited.add(state)
