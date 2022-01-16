@@ -1,0 +1,139 @@
+Help from: https://github.com/mebeim/aoc/blob/master/2021/README.md#day-24---arithmetic-logic-unit
+
+Remember that the goal is z=0 at the end, and simultaneously
+we must choose 14 digits that make the largest number
+
+inp w     # push step
+
+mul x 0   # x = 0
+add x z   # x = z
+mod x 26  # x = x % 26 = z % 26
+div z 1   # z = z
+add x 13  # x = x + 13 = (z % 26) + 13
+eql x w   # if x == w ? x = 1 : x = 0
+eql x 0   # if x == 0 ? x = 1 : x = 1
+
+# after line 7 x, 13, is always greater than w input, 1-9
+# thus line at line 9 x is always 1
+
+x = 1 # result of line 3-9 always, div z 1 is no-op
+
+mul y 0   # y = 0
+add y 25  # y = 25
+mul y x   # y = y, x is 1
+add y 1   # y = 26
+mul z y   # z = z * 26
+mul y 0   # y = 0
+add y w   # y = w, 1-9
+add y 5   # y = w + 5
+mul y x   # y = w + 5, x is 1
+add z y   # z = (z * 26) + w + 5
+
+inp w     # push step
+
+mul x 0
+add x z
+mod x 26
+div z 1
+add x 15
+eql x w
+eql x 0
+
+x = 1     # only change from lines 29-35
+
+mul y 0
+add y 25  # y = 25
+mul y x   # no-op, x = 1
+add y 1   # y = 26
+mul z y   # z = z * 26
+mul y 0   # y = 0
+add y w   # y = w
+add y 14  # y = w + 14
+mul y x   # no-op
+add z y   # z = (z * 26) + w + 14
+
+inp w     # push step
+
+mul x 0
+add x z
+mod x 26
+div z 1
+add x 15
+eql x w
+eql x 0
+
+x = 1     # result
+
+mul y 0
+add y 25  # y = 25
+mul y x
+add y 1   # y = 26
+mul z y   # z = z * 26
+mul y 0   # y = 0
+add y w   # y = w
+add y 15  # y = w + 15
+mul y x
+add z y   # z = (z * 26) + w + 15
+
+inp w     # push step
+
+mul x 0
+add x z
+mod x 26
+div z 1
+add x 11
+eql x w
+eql x 0
+
+x = 1     # result
+
+mul y 0   # y = 0
+add y 25  # y = 25
+mul y x
+add y 1   # y = 26
+mul z y   # z = z * 26
+mul y 0   # y = 0
+add y w   # y = w
+add y 16  # y = w + 16
+mul y x   # y = w + 16
+add z y   # z = (z * 26) + w + 16
+
+inp w     # pop step
+
+mul x 0   # x = 0
+add x z   # x = z
+mod x 26  # x = z % 26
+div z 26  # z = z // 26
+
+x = w + 16 # previous w from line 94
+z = # z negates the previous step to become what is was before
+
+add x -16 # (previous w + 16) + (-16). So in this step (previous w == new w) to make lines 110-119 no-op
+eql x w   # if x == w ? 1 : 0, new w
+eql x 0   # if x == 0 ? 1 : 0, new w
+
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 8
+mul y x
+add z y
+# if x = 0 after 106-108, all 112-121 is no-op, z += 0
+# if x = 1, y = 26, z = (z * 26), y = 0, y = new w + 8, z = (z * 26) + w + 8
+
+x and y are irrelevant as both push and pop steps reset their values to 0 before using them
+
+Simplified:
+  push step => (push_digit + A) into z
+
+  pop step => negates the previous push step (pops off the stack) unless:
+    if (push_digit + A + B) != pop_digit:
+        push some_value into z
+
+There are 7 of each push and pop steps. To get z=0 we must choose digits
+that don't satisfy the condition for additional push: push_digit + A + B == pop_digit
+that maximise for part1 and minimise for part2
